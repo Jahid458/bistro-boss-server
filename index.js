@@ -8,7 +8,6 @@ const port = process.env.PORt || 5000;
 
 
 //middleware
-
 app.use(cors())
 app.use(express.json())
 
@@ -32,17 +31,37 @@ async function run() {
 
     const menuCollections = client.db('bistroDb').collection("menu");
     const reviewCollections = client.db('bistroDb').collection("reviews");
+    const cartCollections = client.db('bistroDb').collection("carts");
+
+
 
     app.get('/menu', async(req,res)=>{
         const result = await menuCollections.find().toArray();
-        res.send(result)
-
+        res.send(result);
     })
+
     app.get('/reviews', async(req,res)=>{
         const result = await reviewCollections.find().toArray();
-        res.send(result)
+        res.send(result);
+    })
+
+    //cart collections 
+
+    app.get('/carts', async(req,res)=>{
+      const email = req.query.email;
+      const query = {email: email};
+      const result = await cartCollections.find(query).toArray();
+      res.send(result);
 
     })
+    app.post('/carts', async(req,res)=>{
+        const cartItem = req.body;
+        const result = await cartCollections.insertOne(cartItem);
+        res.json(result);
+    })
+
+
+
 
 
     // Send a ping to confirm a successful connection
@@ -66,3 +85,14 @@ app.get('/', (req,res)=>{
 app.listen(port, ()=>{
     console.log(`Bistro Boss is sitting on ${port}`);
 })
+
+
+//**
+// Naming Convension 
+// app.get('/users')
+// app.get('/users/:id)
+// app.post('/users') -- create a new user
+// app.put('/users/:id') -- apecific users user
+// app.patch('/users/:id') -- update a specific user
+// app.delete('/users/:id') -- delete a specific user
+//  */
