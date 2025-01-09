@@ -29,12 +29,34 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const usersCollections = client.db('bistroDb').collection("users");
     const menuCollections = client.db('bistroDb').collection("menu");
     const reviewCollections = client.db('bistroDb').collection("reviews");
     const cartCollections = client.db('bistroDb').collection("carts");
 
+    app.get('/users', async(req,res)=> {
+      const users = await usersCollections.find().toArray();
+      res.send(users)
+    })
 
 
+    //users related api 
+    app.post('/users', async(req,res)=>{
+      const user = req.body;
+      //insert email if user doesnot exits 
+      //you can do this many ways 
+      // ( 1.email unique 2. upser 3. simple checking)
+      const qyery = {email: user.email};
+      const existingUser = await usersCollections.findOne(qyery);
+      if(existingUser){
+        return res.send({message: 'user already exits', insertedId: null});
+      }
+      const result = await usersCollections.insertOne(user);
+      res.send(result);
+    })
+
+
+    //menu related api
     app.get('/menu', async(req,res)=>{
         const result = await menuCollections.find().toArray();
         res.send(result);
@@ -68,10 +90,7 @@ async function run() {
         res.json(result);
     })
 
-
-
-
-
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
