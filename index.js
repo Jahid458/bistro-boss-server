@@ -127,12 +127,54 @@ async function run() {
       const result = await usersCollections.deleteOne(query);
       res.send(result);
     })
+     
 
 
-    //menu related api
+    //menu related api 
+
+    //all menu
     app.get('/menu', async(req,res)=>{
         const result = await menuCollections.find().toArray();
         res.send(result);
+    })
+
+    //specific menu for update 
+    app.get('/menu/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await menuCollections.findOne(query);
+      res.send(result);
+    })
+
+    app.post('/menu',verifyToken,verifyAdmin, async(req,res) =>{
+        const item = req.body;
+        const result = await menuCollections.insertOne(item);
+        res.send(result)
+    })
+
+    app.patch('/menu/:id', async(req,res)=>{
+      const item = req.body;
+      const id =req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const updatedDoc ={
+        $set:{
+          name: item.name,
+          category: item.category,
+          price: item.price,
+          recipe: item.recipe,
+          Image: item.image
+
+        }
+      }
+      const result = await menuCollections.updateOne(filter,updatedDoc);
+      res.send(result)
+    })
+
+    app.delete('/menu/:id',verifyToken,verifyAdmin, async(req,res)=>{
+      const id =req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await menuCollections.deleteOne(query);
+      res.send(result)
     })
 
     app.get('/reviews', async(req,res)=>{
@@ -173,9 +215,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-
-
 
 app.get('/', (req,res)=>{
     res.send('Bistreo is hearing')
