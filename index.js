@@ -35,6 +35,7 @@ async function run() {
     const menuCollections = client.db('bistroDb').collection("menu");
     const reviewCollections = client.db('bistroDb').collection("reviews");
     const cartCollections = client.db('bistroDb').collection("carts");
+    const paymentCollections = client.db('bistroDb').collection("payments");
 
 
     //jwt related APis 
@@ -180,6 +181,7 @@ async function run() {
 
     app.get('/reviews', async(req,res)=>{
         const result = await reviewCollections.find().toArray();
+
         res.send(result);
     })
 
@@ -221,6 +223,21 @@ async function run() {
         clientSecret: paymentIntent.client_secret
       })
     });
+
+    //payment related APIS
+    app.post('/payments', async(req,res) =>{
+      const payment = req.body;
+      const paymentResult = await paymentCollections.insertOne(payment);
+
+      //carefully delete  each item on the cart 
+      console.log('payment Info', payment);
+      const query = {_id: {
+        $in: payment.cartIds.map(id => new  ObjectId(id))
+      }};
+      const deleteResult = await cartCollections.deleteMany(query)
+      res.send({paymentResult, deleteResult})
+
+    })
 
     
     // Send a ping to confirm a successful connection
