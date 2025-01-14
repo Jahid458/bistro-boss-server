@@ -74,7 +74,7 @@ async function run() {
         next()
     }
 
-    app.get('/user/admin/:email',verifyToken, async(req,res)=>{
+    app.get('/users/admin/:email',verifyToken, async(req,res)=>{
       const email = req.params.email;
       if(email !== req.decoded.email){
         return res.status(403).send({message: 'forbidden aceess'})
@@ -158,6 +158,7 @@ async function run() {
       const item = req.body;
       const id =req.params.id;
       const filter = {_id: new ObjectId(id)}
+
       const updatedDoc ={
         $set:{
           name: item.name,
@@ -237,7 +238,6 @@ async function run() {
     app.post('/payments', async(req,res) =>{
       const payment = req.body;
       const paymentResult = await paymentCollections.insertOne(payment);
-
       //carefully delete  each item on the cart 
       console.log('payment Info', payment);
       const query = {_id: {
@@ -245,7 +245,6 @@ async function run() {
       }};
       const deleteResult = await cartCollections.deleteMany(query)
       res.send({paymentResult, deleteResult})
-
     })
 
     
@@ -260,6 +259,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req,res)=>{
+
     res.send('Bistreo is hearing')
 })
 
